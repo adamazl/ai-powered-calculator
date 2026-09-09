@@ -1,70 +1,58 @@
 import { describe, expect, test } from "vitest"
-import { MODELS, generateResponse } from "./oracle"
+import { generateResponse } from "./oracle"
 
 const ask = (overrides: Partial<Parameters<typeof generateResponse>[0]> = {}) =>
-  generateResponse({
-    expression: "2 + 2",
-    result: "4",
-    model: "cognitex-4-ultra",
-    seed: 0,
-    ...overrides,
+  generateResponse({ expression: "9 × 9", result: "81", seed: 0, ...overrides })
+
+const paragraphs = (script: string) => script.split("\n\n")
+
+describe("the script", () => {
+  test("states the result", () => {
+    expect(ask().script).toContain("81")
   })
 
-describe("answering", () => {
-  test("states the result somewhere in the answer", () => {
-    expect(ask().answer).toContain("4")
+  test("restates the expression it was given", () => {
+    expect(ask().script).toContain("9 × 9")
   })
 
-  test("shows its working in at least three steps", () => {
-    expect(ask().reasoning.length).toBeGreaterThanOrEqual(3)
+  test("runs to an unreasonable number of paragraphs", () => {
+    expect(paragraphs(ask().script).length).toBeGreaterThanOrEqual(8)
   })
 
-  test("every reasoning step is prose, not an empty placeholder", () => {
-    for (const step of ask().reasoning) expect(step.trim().length).toBeGreaterThan(10)
+  test("has no empty paragraphs to pad it out", () => {
+    for (const part of paragraphs(ask().script)) {
+      expect(part.trim().length).toBeGreaterThan(10)
+    }
   })
 
-  test("is implausibly confident", () => {
-    const { confidence } = ask()
-    expect(confidence).toBeGreaterThanOrEqual(90)
-    expect(confidence).toBeLessThan(100)
+  test("works through its reasoning before reaching the answer", () => {
+    const index = paragraphs(ask().script).findIndex((p) => p.includes("81"))
+    expect(index).toBeGreaterThan(3)
+  })
+
+  test("takes a moment to warm up before any text appears", () => {
+    const { latencyMs } = ask()
+    expect(latencyMs).toBeGreaterThan(200)
+    expect(latencyMs).toBeLessThan(2000)
   })
 })
 
 describe("seeding", () => {
-  test("the same seed reproduces the same response", () => {
+  test("the same seed reproduces the same script", () => {
     expect(ask({ seed: 7 })).toEqual(ask({ seed: 7 }))
   })
 
-  test("regenerating with new seeds reaches several different phrasings", () => {
-    const answers = new Set(
-      Array.from({ length: 10 }, (_, seed) => ask({ seed }).answer),
+  test("different seeds reach several different scripts", () => {
+    const scripts = new Set(
+      Array.from({ length: 10 }, (_, seed) => ask({ seed }).script),
     )
-    expect(answers.size).toBeGreaterThanOrEqual(3)
+    expect(scripts.size).toBeGreaterThanOrEqual(3)
   })
 
-  test("every phrasing still contains the correct result", () => {
+  test("every variation still states the correct result", () => {
     for (let seed = 0; seed < 25; seed++) {
-      expect(ask({ seed, expression: "9 × 9", result: "81" }).answer).toContain("81")
+      expect(ask({ seed, expression: "2 + 4", result: "6" }).script).toContain("6")
     }
-  })
-})
-
-describe("models", () => {
-  test("the verbose model spends more tokens than the terse one", () => {
-    const ultra = ask({ model: "cognitex-4-ultra" })
-    const mini = ask({ model: "slide-rule-mini" })
-    expect(ultra.tokens).toBeGreaterThan(mini.tokens)
-  })
-
-  test("each model has its own thinking latency", () => {
-    const latencies = MODELS.map((m) => ask({ model: m.id }).latencyMs)
-    expect(new Set(latencies).size).toBe(MODELS.length)
-  })
-
-  test("cost is billed per token at the model's rate", () => {
-    const model = MODELS[0]
-    const response = ask({ model: model.id })
-    expect(response.cost).toBeCloseTo(response.tokens * model.pricePerToken, 10)
   })
 })
 
@@ -75,11 +63,11 @@ describe("undefined results", () => {
     expect(declined().declined).toBe(true)
   })
 
-  test("loses its nerve about the confidence score", () => {
-    expect(declined().confidence).toBeLessThan(50)
+  test("still explains itself at length", () => {
+    expect(paragraphs(declined().script).length).toBeGreaterThanOrEqual(5)
   })
 
   test("never claims the answer is undefined-as-a-value", () => {
-    expect(declined().answer).not.toMatch(/\bis\s+Undefined\b/)
+    expect(declined().script).not.toMatch(/\bis\s+Undefined\b/)
   })
 })

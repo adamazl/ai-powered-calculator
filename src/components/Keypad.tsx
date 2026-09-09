@@ -1,4 +1,5 @@
 import type { Key } from "@/lib/calculator"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 interface KeyDef {
@@ -46,29 +47,29 @@ export function Keypad({ onPress }: { onPress: (key: Key) => void }) {
   return (
     <div className="grid grid-cols-4 gap-2.5">
       {KEYS.map(({ key, label, tone, wide }) => (
-        <button
+        <Button
           key={key}
-          type="button"
+          variant="ghost"
           aria-label={LABELS[key] ?? label}
           onClick={() => onPress(key)}
           className={cn(
-            "h-13 rounded-[10px] text-[19px] font-medium tabular-nums",
+            "h-13 rounded-[11px] text-[20px] font-medium tabular-nums",
             "shadow-[0_2px_0_0_var(--color-case-shadow),inset_0_1px_0_0_rgb(255_255_255/0.07)]",
             "transition-[transform,box-shadow,background-color] duration-75",
-            "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-equals)]",
+            "focus-visible:ring-[var(--color-equals)]/70",
             "active:translate-y-[2px] active:shadow-[inset_0_1px_2px_0_var(--color-case-shadow)]",
             tone === "equals"
-              ? "bg-[var(--color-equals)] text-[#2b2205] hover:brightness-105"
+              ? "bg-[var(--color-equals)] text-[#2b2205] hover:bg-[var(--color-equals)] hover:brightness-105"
               : tone === "operator"
-                ? "bg-[var(--color-key-lit)] text-[var(--color-key-mark)] hover:bg-[#4b473d]"
+                ? "bg-[var(--color-key-lit)] text-[var(--color-key-mark)] hover:bg-[#4b473d] hover:text-[var(--color-key-mark)]"
                 : tone === "modifier"
-                  ? "bg-[var(--color-key-dim)] text-[var(--color-key-mark)]/75 hover:bg-[var(--color-key)]"
-                  : "bg-[var(--color-key)] text-[var(--color-key-mark)] hover:bg-[var(--color-key-lit)]",
+                  ? "bg-[var(--color-key-dim)] text-[var(--color-key-mark)]/75 hover:bg-[var(--color-key)] hover:text-[var(--color-key-mark)]"
+                  : "bg-[var(--color-key)] text-[var(--color-key-mark)] hover:bg-[var(--color-key-lit)] hover:text-[var(--color-key-mark)]",
             wide && "col-span-2",
           )}
         >
           {label}
-        </button>
+        </Button>
       ))}
     </div>
   )
