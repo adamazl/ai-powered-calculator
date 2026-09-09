@@ -1,0 +1,98 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* The inference console: deep petrol, brass accent. */
+  --background: #101c24;
+  --foreground: #e4edef;
+  --card: #16262f;
+  --card-foreground: #e4edef;
+  --popover: #16262f;
+  --popover-foreground: #e4edef;
+  --primary: #c8a24b;
+  --primary-foreground: #14202a;
+  --secondary: #1d303a;
+  --secondary-foreground: #e4edef;
+  --muted: #1a2a33;
+  --muted-foreground: #7e96a0;
+  --accent: #1d303a;
+  --accent-foreground: #e4edef;
+  --destructive: #c4705a;
+  --border: #22343d;
+  --input: #22343d;
+  --ring: #c8a24b;
+  --radius: 0.375rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+
+  --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+
+  /* The calculator is a physical object and keeps its own materials. */
+  --color-case: #26241f;
+  --color-case-lip: #35322b;
+  --color-case-shadow: #100f0c;
+  --color-key: #35322b;
+  --color-key-lit: #423e35;
+  --color-key-dim: #2b2924;
+  --color-key-mark: #d8d3c4;
+  --color-equals: #e8b62c;
+  --color-lcd: #b3ba8a;
+  --color-lcd-ink: #23281b;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-synthesis-weight: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes lcd-wait {
+  0%,
+  100% {
+    opacity: 0.16;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
