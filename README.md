@@ -1,18 +1,11 @@
 # AI-Powered Calculator
 
-A parody, and nothing else: one calculator, on its own, in the middle of the
-screen. The arithmetic is real. The intelligence is not.
+A parody. The arithmetic is real; the intelligence is not. Every time you
+press equals, a fabricated language model spends a second thinking, shows you its reasoning, and then explains — at length, in a serif
+typeface, with unsolicited caveats — that two plus two comes to four.
 
-Press equals and the display doesn't give you the answer. It thinks for a
-moment, then types out an entire essay — warming up, parsing your query,
-retrieving the Peano axioms, verifying its own working, and finally, several
-paragraphs and a few unsolicited caveats later, telling you what two plus four
-comes to. Then the screen clears and the number appears.
-
-There is no API key, no network call and no model. `src/lib/oracle.ts` is a pile
+There is no API key, no network call, and no model. `src/lib/oracle.ts` is a pile
 of templates and a seeded random number generator.
-
-Live at <https://adamazl.github.io/ai-powered-calculator/>
 
 ## Running it
 
@@ -44,27 +37,36 @@ Two pure modules do the real work, and both are covered by tests:
   floating point noise, and records each completed sum as an `Evaluation`. The
   expression stays on the display's upper line after equals, so the answer never
   arrives without its question, and clears when the next entry begins.
-- `src/lib/oracle.ts` — fabricates what a model would say, as one continuous
-  script for the display to crawl through. Given an expression, its result and a
-  seed it returns the script and a short warm-up latency. The same seed always
-  produces the same script.
+- `src/lib/oracle.ts` — fabricates the model's output. Given an expression, its
+  result, a model and a seed, it returns reasoning steps, prose, a confidence
+  score and a token count. The same seed always produces the same response, so
+  Regenerate simply increments the seed.
 
-Around those: `useStreamingText` reveals the script a few characters at a time,
-`Display` runs one exchange's warm-up-then-crawl-then-settle lifecycle and keeps
-the newest line in view, and `App` holds the calculator state.
+The React layer wraps those: `useStreamingText` reveals the answer a few
+characters at a time, `AssistantTurn` handles one exchange's thinking-then-
+streaming lifecycle, and `App` holds the transcript and the running bill.
 
-The result is computed the instant you press equals — the display is merely
-withholding it, so chaining still works. Any keypress takes the display back
-from the model. Dividing by zero is the one case where it declines rather than
-inventing a number.
+The calculator's display is gated on the model. Press equals and the LCD keeps
+showing the expression with a blinking wait indicator where the answer belongs;
+the number only appears once the model has finished explaining it. The value is
+computed immediately underneath, so chaining still works — the display is merely
+withholding it. Any keypress takes the display back from the model.
+
+Dividing by zero is the one case where the model declines rather than inventing
+a number, and its confidence drops accordingly.
+
+On a narrow screen the calculator and the transcript each fill the viewport, so
+pressing equals glides the page down to watch the model work and returns you to
+the keypad once it has finished — by which point the answer is on the display.
+On a wide screen the two sit side by side, nothing is off screen, and the page
+does not scroll at all: `usePageScroll` checks whether the page is scrollable
+before moving anything, so the same code is simply inert there. A reader who
+scrolls somewhere else mid-essay is left where they put themselves.
 
 ## Design notes
 
-The calculator is a physical object: warm plastic, key travel, a green LCD, in
-the spirit of a Braun ET66 crossed with a Casio whose dot-matrix screen shows
-sentences. It sits alone in a pool of light on a deep petrol ground. One
-typeface throughout — Archivo, an industrial grotesk — because an LCD has no
-business setting a serif.
-
-shadcn/ui supplies the `Button` the keypad is built from; the rest of the kit
-came out along with the chat panel it was serving.
+Two materials in one screen. The calculator is a physical object — warm plastic,
+key travel, an LCD — in the spirit of a Braun ET66. The console beside it is a
+flat surface: deep petrol, hairline rules, brass accents. Archivo sets the
+chrome; Newsreader sets the model's prose, because an academic serif is the
+funniest possible frame for a paragraph about adding two numbers.
